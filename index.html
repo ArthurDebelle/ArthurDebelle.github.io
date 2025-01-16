@@ -71,7 +71,7 @@
             .then(response => response.json())
             .then(data => {
                 L.geoJSON(data, {
-                    style: defaultStyle,  // Apply default black color to all regions
+                    style: defaultStyle,  // Apply default grey color to all regions
                     onEachFeature: function (feature, layer) {
                         layer.on('click', function () {
                             // Restore the original color of the previously selected region
@@ -98,12 +98,15 @@
                                 <span>KRS Code: ${code}</span>
                                 <br><label for="temperature-slider">Temperature: </label>
                                 <input type="range" id="temperature-slider" min="0" max="20" value="0" />
-                                <span id="slider-value">+0°C</span>
+                                <span id="slider-value">+0${String.fromCharCode(176)}C</span>
                             `;
 
                             // Reset the slider value and color
                             const slider = document.getElementById('temperature-slider');
+                            const sliderValue = document.getElementById('slider-value');
+
                             slider.value = 0;
+                            sliderValue.innerHTML = `+${slider.value}${String.fromCharCode(176)}C`;
                             document.getElementById('slider-value').textContent = "+0°C";
                             updateRegionColor(0); // Update the color based on the slider value
 
@@ -112,10 +115,24 @@
                                 const temperature = this.value;
                                 document.getElementById('slider-value').textContent = `+${temperature}°C`;
                                 updateRegionColor(temperature);
+                                sliderValue.innerHTML = `+${slider.value}${String.fromCharCode(176)}C`;
                             });
                         });
                     }
                 }).addTo(map);
+                // Simulate clicking on the region with krs_code "09162"
+                var targetRegion = data.features.find(function (feature) {
+                    return feature.properties.krs_code === "09162"; // Find the region with the specific code
+                });
+
+                if (targetRegion) {
+                    geojsonLayer.eachLayer(function (layer) {
+                        // If this layer matches the targetRegion, simulate a click on it
+                        if (layer.feature === targetRegion) {
+                            layer.fire('click');
+                        }
+                    });
+                }
             });
 
         // Function to change the region color based on temperature
