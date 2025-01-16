@@ -160,7 +160,7 @@
             });
         }
 
-        // Function to calculate color based on the properties
+        // Function to calculate color based on the property values
         function getColorForProperties(temperature, humidity, windSpeed, precipitation) {
             const tempColor = Math.min(255, Math.floor(255 * (temperature / 20)));
             const humidityColor = Math.min(255, Math.floor(255 * (humidity / 100)));
