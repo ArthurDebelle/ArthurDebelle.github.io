@@ -50,43 +50,65 @@
     <script>
         var map = L.map('map').setView([51.1657, 10.4515], 6);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '©️ OpenStreetMap contributors'
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CartoDB</a>'
         }).addTo(map);
 
         let selectedLayer = null;
+        let originalColor = null; // Store the original color
 
-        // Add GeoJSON layer
+        // Default style for all regions to be black initially
+        const defaultStyle = {
+            fillColor: 'silver',
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            fillOpacity: 0.7
+        };
+
+        // Add GeoJSON layer with all regions initially set to black
         fetch('germany_new.geojson')
             .then(response => response.json())
             .then(data => {
                 L.geoJSON(data, {
+                    style: defaultStyle,  // Apply default black color to all regions
                     onEachFeature: function (feature, layer) {
                         layer.on('click', function () {
-                            selectedLayer = layer; // Store the selected layer
+                            // Restore the original color of the previously selected region
+                            if (selectedLayer) {
+                                selectedLayer.setStyle({
+                                    fillColor: originalColor,
+                                    weight: 2,
+                                    opacity: 1,
+                                    color: 'white',
+                                    fillOpacity: 0.7
+                                });
+                            }
 
-                            // Update the info box with region details and the slider
+                            // Store the selected layer and its original color
+                            selectedLayer = layer;
+                            originalColor = layer.options.fillColor || 'black'; // Store original color
+
+                            // Update the info box
                             const name = feature.properties.krs_name || "Unknown Region";
                             const code = feature.properties.krs_code || "No Code Available";
                             const infoBox = document.getElementById('info-box');
                             infoBox.innerHTML = `
                                 <strong>${name}</strong>
                                 <span>KRS Code: ${code}</span>
-                                <div id="slider-container">
-                                    <label for="temperature-slider">Temperature: </label>
-                                    <input type="range" id="temperature-slider" min="0" max="20" value="0" />
-                                    <span id="slider-value">+0°C</span>
-                                </div>
+                                <br><label for="temperature-slider">Temperature: </label>
+                                <input type="range" id="temperature-slider" min="0" max="20" value="0" />
+                                <span id="slider-value">+0°C</span>
                             `;
 
-                            // Reset the slider value
+                            // Reset the slider value and color
                             const slider = document.getElementById('temperature-slider');
                             slider.value = 0;
                             document.getElementById('slider-value').textContent = "+0°C";
                             updateRegionColor(0); // Update the color based on the slider value
 
-                            // Update region color based on the slider input
-                            document.getElementById('temperature-slider').addEventListener('input', function () {
+                            // Attach the slider event listener after the info box is updated
+                            slider.addEventListener('input', function () {
                                 const temperature = this.value;
                                 document.getElementById('slider-value').textContent = `+${temperature}°C`;
                                 updateRegionColor(temperature);
