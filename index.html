@@ -57,7 +57,7 @@
         let selectedLayer = null;
         let originalColor = null; // Store the original color
 
-        // Default style for all regions to be black initially
+        // Default style for all regions to be silver initially
         const defaultStyle = {
             fillColor: 'silver',
             weight: 2,
@@ -66,12 +66,12 @@
             fillOpacity: 0.7
         };
 
-        // Add GeoJSON layer with all regions initially set to black
+        // Add GeoJSON layer with all regions initially set to silver
         fetch('germany_new.geojson')
             .then(response => response.json())
             .then(data => {
                 L.geoJSON(data, {
-                    style: defaultStyle,  // Apply default black color to all regions
+                    style: defaultStyle,  // Apply default silver color to all regions
                     onEachFeature: function (feature, layer) {
                         layer.on('click', function () {
                             // Restore the original color of the previously selected region
@@ -87,9 +87,9 @@
 
                             // Store the selected layer and its original color
                             selectedLayer = layer;
-                            originalColor = layer.options.fillColor || 'black'; // Store original color
+                            originalColor = layer.options.fillColor || 'silver'; // Store original color
 
-                            // Update the info box
+                            // Update the info box with sliders
                             const name = feature.properties.krs_name || "Unknown Region";
                             const code = feature.properties.krs_code || "No Code Available";
                             const infoBox = document.getElementById('info-box');
@@ -98,33 +98,59 @@
                                 <span>KRS Code: ${code}</span>
                                 <br><label for="temperature-slider">Temperature: </label>
                                 <input type="range" id="temperature-slider" min="0" max="20" value="0" />
-                                <span id="slider-value">+0<span>&#176;</span>C</span>
+                                <span id="temperature-value">+0<span>&#176;</span>C</span>
+                                <br><label for="humidity-slider">Humidity: </label>
+                                <input type="range" id="humidity-slider" min="0" max="100" value="50" />
+                                <span id="humidity-value">50%</span>
+                                <br><label for="wind-speed-slider">Wind Speed: </label>
+                                <input type="range" id="wind-speed-slider" min="0" max="50" value="10" />
+                                <span id="wind-speed-value">10 km/h</span>
+                                <br><label for="precipitation-slider">Precipitation: </label>
+                                <input type="range" id="precipitation-slider" min="0" max="200" value="0" />
+                                <span id="precipitation-value">0 mm</span>
                             `;
 
-                            // Reset the slider value and color
-                            const slider = document.getElementById('temperature-slider');
-                            const sliderValue = document.getElementById('slider-value');
+                            // Reset all slider values and colors
+                            const sliders = {
+                                temperature: document.getElementById('temperature-slider'),
+                                humidity: document.getElementById('humidity-slider'),
+                                windSpeed: document.getElementById('wind-speed-slider'),
+                                precipitation: document.getElementById('precipitation-slider')
+                            };
 
-                            slider.value = 0;
-                            sliderValue.innerHTML = `+${slider.value}<span>&#176;</span>C`;
-                            document.getElementById('slider-value').textContent = "+0°C";
-                            updateRegionColor(0); // Update the color based on the slider value
+                            // Update region color based on initial values
+                            updateRegionColor(sliders);
 
-                            // Attach the slider event listener after the info box is updated
-                            slider.addEventListener('input', function () {
-                                const temperature = this.value;
-                                document.getElementById('slider-value').textContent = `+${temperature}°C`;
-                                updateRegionColor(temperature);
-                                sliderValue.innerHTML = `+${slider.value}<span>&#176;</span>C`;
+                            // Attach event listeners for sliders
+                            sliders.temperature.addEventListener('input', function () {
+                                document.getElementById('temperature-value').textContent = `+${this.value}${String.fromCharCode(176)}C`;
+                                updateRegionColor(sliders);
+                            });
+                            sliders.humidity.addEventListener('input', function () {
+                                document.getElementById('humidity-value').textContent = `${this.value}%`;
+                                updateRegionColor(sliders);
+                            });
+                            sliders.windSpeed.addEventListener('input', function () {
+                                document.getElementById('wind-speed-value').textContent = `${this.value} km/h`;
+                                updateRegionColor(sliders);
+                            });
+                            sliders.precipitation.addEventListener('input', function () {
+                                document.getElementById('precipitation-value').textContent = `${this.value} mm`;
+                                updateRegionColor(sliders);
                             });
                         });
                     }
                 }).addTo(map);
             });
 
-        // Function to change the region color based on temperature
-        function updateRegionColor(temperature) {
-            const color = getColorForTemperature(temperature);
+        // Function to change the region color based on all sliders
+        function updateRegionColor(sliders) {
+            const temperature = sliders.temperature.value;
+            const humidity = sliders.humidity.value;
+            const windSpeed = sliders.windSpeed.value;
+            const precipitation = sliders.precipitation.value;
+
+            const color = getColorForProperties(temperature, humidity, windSpeed, precipitation);
             selectedLayer.setStyle({
                 fillColor: color,
                 weight: 2,
@@ -134,11 +160,14 @@
             });
         }
 
-        // Function to get color based on temperature (0-20°C)
-        function getColorForTemperature(temp) {
-            const red = Math.min(255, Math.floor(255 * (temp / 20)));
-            const blue = 255 - red;
-            return `rgb(${red}, ${blue}, 255)`; // RGB with varying red and blue
+        // Function to calculate color based on the properties
+        function getColorForProperties(temperature, humidity, windSpeed, precipitation) {
+            const tempColor = Math.min(255, Math.floor(255 * (temperature / 20)));
+            const humidityColor = Math.min(255, Math.floor(255 * (humidity / 100)));
+            const windColor = Math.min(255, Math.floor(255 * (windSpeed / 50)));
+            const precipColor = Math.min(255, Math.floor(255 * (precipitation / 200)));
+
+            return `rgb(${tempColor}, ${humidityColor}, ${windColor})`; // RGB with varying red, green, blue
         }
     </script>
 </body>
