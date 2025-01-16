@@ -120,19 +120,7 @@
                         });
                     }
                 }).addTo(map);
-                // Simulate clicking on the region with krs_code "09162"
-                var targetRegion = data.features.find(function (feature) {
-                    return feature.properties.krs_code === "09162"; // Find the region with the specific code
-                });
 
-                if (targetRegion) {
-                    geojsonLayer.eachLayer(function (layer) {
-                        // If this layer matches the targetRegion, simulate a click on it
-                        if (layer.feature === targetRegion) {
-                            layer.fire('click');
-                        }
-                    });
-                }
             });
 
         // Function to change the region color based on temperature
