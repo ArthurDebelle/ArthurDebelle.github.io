@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Map of Germany</title>
 
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="" />
 
-    <!-- Inline CSS for positioning the text above the map and the right-side panel -->
     <style>
         #header {
             text-align: center;
@@ -22,7 +20,7 @@
         #map_germany_CROP-MATE {
             height: 600px; /* Adjust the height of the map */
             width: 800px; /* Adjusted % width */
-            float: left;
+            display: inline-block; /* Use inline-block for left alignment */
         }
 
         /* Right-side tile for displaying coordinates */
@@ -30,7 +28,7 @@
             position: fixed;
             top: 40px;
             right: 10px;
-            width: 150px;   /* HelloWorldsss */
+            width: 300px;   /* HelloWorldsss */
             padding: 10px;
             background-color: rgba(14, 136, 243, 0.55);
             border: 1px solid #ccc;
@@ -42,57 +40,34 @@
             margin: 0;
             font-size: 14px;
         }
+
+        /* Minimalist Dark Theme */
+        body {
+            font-family: sans-serif;
+            background-color: rgba(255, 255, 255, 0.29);
+            color: #000000;
+            margin: 0;
+            padding: 20px;
+        }
     </style>
 
 </head>
 <body>
-    <!-- Text above the map -->
     <div id="header">
-        Interactive Map of Munich, Germany
+        Interactive Map of Germany
     </div>
 
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #222;
-            color: #fff;
-            margin: 0;
-            padding: 0px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            max-width: 600px;
-            text-align: center;
-        }
-    </style>
-
-    <!-- Map container -->
     <div id="map_germany_CROP-MATE"></div>
 
-    <!-- Right-side panel displaying instructions and coordinates -->
     <div id="right-panel">
         <p><strong>Click anywhere on the map!</strong></p>
         <p>Coordinates: </p>
         <p><span id="coordinates">None</span></p>
     </div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
-    <!-- Custom JS File -->
     <script src="Map_Germany.js"></script>
 </body>
 </html>
