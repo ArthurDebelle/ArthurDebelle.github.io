@@ -15,6 +15,7 @@ for i, row in counties.iterrows():
         continue
     else:
         countie_climate_data = climate_data[krs_code]
+
         counties.at[i, 'parname'] = 3
 
 counties.to_file("/Users/arthurdebelle/Desktop/TUM/3 - WiSe 24-25/GovTech/counties_climate_data.geojson", driver="GeoJSON")

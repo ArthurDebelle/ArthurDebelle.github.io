@@ -1,66 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Map of Munich</title>
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin="" />
-    <!-- Inline CSS for positioning the text above the map and the right-side panel -->
+    <title>Interactive Germany Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
-        #header {
-            text-align: center;
-            font-size: 24px;
-            margin-top: 20px;
-            font-weight: bold;
+        #map {
+            height: 600px;
+            width: 70%;
+            margin-left: 0;
+            display: inline-block;
         }
-
-        #map_germany_CROP-MATE {
-            height: 700px;
-            width: 70%; /* Adjusted to 70% width */
-            float: left;
-        }
-
-        /* Right-side tile for displaying coordinates */
-        #right-panel {
-            position: fixed;
-            top: 20px;
-            right: 10px;
-            width: 200px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
+        #info-box {
+            height: 600px;
+            width: 28%;
+            display: inline-block;
+            vertical-align: top;
             border: 1px solid #ccc;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            overflow-y: auto;
+            background-color: #f9f9f9;
         }
-
-        #right-panel p {
-            margin: 0;
-            font-size: 14px;
+        #info-box strong {
+            font-size: 16px;
+            display: block;
+            margin-bottom: 5px;
+            text-align: center; /* Center-aligned */
+        }
+        #info-box span {
+            color: #555;
+        }
+        #slider-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+        #slider-value {
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- Text above the map -->
-    <div id="header">
-        Interactive Map of Munich, Germany
+    <div id="map"></div>
+    <div id="info-box">
+        <strong>Region Information</strong>
+        <span>Click on a region to see details.</span>
     </div>
 
-    <!-- Map container -->
-    <div id="map_germany_CROP-MATE"></div>
+    <script>
+        var map = L.map('map').setView([51.1657, 10.4515], 6);
 
-    <!-- Right-side panel displaying instructions and coordinates -->
-    <div id="right-panel">
-        <p><strong>Click anywhere on the map</strong></p>
-        <p>Coordinates: <span id="coordinates">None</span></p>
-    </div>
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '©️ OpenStreetMap contributors'
+        }).addTo(map);
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""></script>
-    <!-- Custom JS File -->
-    <script src="Map_Germany.js"></script>
+        let selectedLayer = null;
+
+        // Add GeoJSON layer
+        fetch('germany_new.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    onEachFeature: function (feature, layer) {
+                        layer.on('click', function () {
+                            selectedLayer = layer; // Store the selected layer
+
+                            // Update the info box with region details and the slider
+                            const name = feature.properties.krs_name || "Unknown Region";
+                            const code = feature.properties.krs_code || "No Code Available";
+                            const infoBox = document.getElementById('info-box');
+                            infoBox.innerHTML = `
+                                <strong>${name}</strong>
+                                <span>KRS Code: ${code}</span>
+                                <div id="slider-container">
+                                    <label for="temperature-slider">Temperature: </label>
+                                    <input type="range" id="temperature-slider" min="0" max="20" value="0" />
+                                    <span id="slider-value">+0°C</span>
+                                </div>
+                            `;
+
+                            // Reset the slider value
+                            const slider = document.getElementById('temperature-slider');
+                            slider.value = 0;
+                            document.getElementById('slider-value').textContent = "+0°C";
+                            updateRegionColor(0); // Update the color based on the slider value
+
+                            // Update region color based on the slider input
+                            document.getElementById('temperature-slider').addEventListener('input', function () {
+                                const temperature = this.value;
+                                document.getElementById('slider-value').textContent = `+${temperature}°C`;
+                                updateRegionColor(temperature);
+                            });
+                        });
+                    }
+                }).addTo(map);
+            });
+
+        // Function to change the region color based on temperature
+        function updateRegionColor(temperature) {
+            const color = getColorForTemperature(temperature);
+            selectedLayer.setStyle({
+                fillColor: color,
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.7
+            });
+        }
+
+        // Function to get color based on temperature (0-20°C)
+        function getColorForTemperature(temp) {
+            const red = Math.min(255, Math.floor(255 * (temp / 20)));
+            const blue = 255 - red;
+            return `rgb(${red}, ${blue}, 255)`; // RGB with varying red and blue
+        }
+    </script>
 </body>
 </html>
