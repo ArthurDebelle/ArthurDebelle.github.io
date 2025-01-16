@@ -21,7 +21,7 @@
 
         #map_germany_CROP-MATE {
             height: 600px; /* Adjust the height of the map */
-            width: 70%; /* Adjusted % width */
+            width: 800px; /* Adjusted % width */
             float: left;
         }
 
@@ -47,10 +47,36 @@
 </head>
 <body>
     <!-- Text above the map -->
-    <!--<div id="header">
+    <div id="header">
         Interactive Map of Munich, Germany
     </div>
-    -->
+
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #222;
+            color: #fff;
+            margin: 0;
+            padding: 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-width: 600px;
+            text-align: center;
+        }
+    </style>
 
     <!-- Map container -->
     <div id="map_germany_CROP-MATE"></div>
